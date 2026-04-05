@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>10 Tips to Stop Hitting Claude's Limits</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Fraunces:ital,wght@0,300;0,700;1,300;1,700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0c0c0b;
+      --surface: #151513;
+      --surface2: #1c1c19;
+      --border: rgba(255,255,255,0.07);
+      --border-hover: rgba(255,255,255,0.14);
+      --amber: #f5a623;
+      --amber-dim: #c47d0e;
+      --amber-glow: rgba(245,166,35,0.12);
+      --text: #e8e4d9;
+      --text-muted: #7d7a72;
+      --text-dim: #4a4741;
+      --green: #52a97c;
+      --mono: 'DM Mono', monospace;
+      --serif: 'Fraunces', serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 14px;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    /* NOISE TEXTURE */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.35;
+    }
+
+    /* LAYOUT */
+    .page { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; padding: 0 24px; }
+
+    /* BACK LINK */
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: var(--text-muted); text-decoration: none;
+      font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 32px 0 0;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--amber); }
+    .back-link::before { content: '←'; font-size: 14px; }
+
+    /* HERO */
+    .hero { padding: 48px 0 56px; border-bottom: 1px solid var(--border); }
+
+    .hero-badge {
+      display: inline-block;
+      background: var(--amber-glow); border: 1px solid rgba(245,166,35,0.25);
+      color: var(--amber); font-size: 11px; letter-spacing: 0.12em;
+      text-transform: uppercase; padding: 4px 12px; border-radius: 2px;
+      margin-bottom: 24px;
+    }
+
+    .hero-title {
+      font-family: var(--serif);
+      font-size: clamp(40px, 7vw, 64px);
+      font-weight: 700; line-height: 1.05;
+      color: var(--text); margin-bottom: 8px;
+    }
+    .hero-title em {
+      font-style: italic; color: var(--amber);
+    }
+
+    .hero-subtitle {
+      font-family: var(--serif); font-style: italic;
+      font-size: clamp(18px, 3vw, 22px); font-weight: 300;
+      color: var(--text-muted); margin-bottom: 28px; line-height: 1.4;
+    }
+
+    .hero-intro {
+      font-size: 14px; color: var(--text-muted); line-height: 1.8;
+      max-width: 560px;
+    }
+
+    .hero-intro strong { color: var(--text); font-weight: 500; }
+
+    /* TIPS LIST */
+    .tips-list { padding: 48px 0; }
+
+    .tip {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      margin-bottom: 12px;
+      background: var(--surface);
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .tip:hover { border-color: var(--border-hover); }
+    .tip.active { border-color: rgba(245,166,35,0.3); }
+
+    .tip-header {
+      display: flex; align-items: center; gap: 16px;
+      padding: 20px 24px;
+      cursor: pointer; user-select: none;
+      transition: background 0.15s;
+    }
+    .tip-header:hover { background: var(--surface2); }
+
+    .tip-num {
+      font-size: 11px; letter-spacing: 0.1em; color: var(--amber);
+      text-transform: uppercase; min-width: 40px; opacity: 0.8;
+    }
+
+    .tip-title-text {
+      flex: 1; font-size: 14px; font-weight: 500; color: var(--text);
+      letter-spacing: 0.01em;
+    }
+
+    .tip-chevron {
+      color: var(--text-dim); font-size: 16px;
+      transition: transform 0.25s cubic-bezier(0.4,0,0.2,1), color 0.2s;
+      flex-shrink: 0;
+    }
+    .tip.active .tip-chevron { transform: rotate(180deg); color: var(--amber); }
+
+    /* TIP BODY */
+    .tip-body {
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1);
+    }
+    .tip.active .tip-body { max-height: 1200px; }
+
+    .tip-content {
+      padding: 0 24px 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    .tip-content p {
+      color: var(--text-muted); font-size: 13.5px; line-height: 1.85;
+      margin: 18px 0 12px;
+    }
+
+    .tip-content p strong { color: var(--text); font-weight: 500; }
+
+    /* CODE BLOCK */
+    .code-block {
+      background: #111110; border: 1px solid var(--border);
+      border-radius: 4px; padding: 20px 20px 16px;
+      margin: 16px 0; position: relative;
+      font-family: var(--mono); font-size: 12.5px;
+      color: #c8c3b5; line-height: 1.75; overflow-x: auto;
+    }
+
+    .code-block pre { white-space: pre-wrap; word-break: break-word; }
+
+    .code-comment { color: var(--text-dim); }
+    .code-highlight { color: var(--amber); }
+    .code-value { color: var(--green); }
+    .code-label { color: #8ba3c9; }
+
+    /* FORMULA BOX */
+    .formula-box {
+      background: var(--amber-glow); border: 1px solid rgba(245,166,35,0.2);
+      border-radius: 4px; padding: 16px 20px; margin: 16px 0;
+      font-family: var(--mono); font-size: 13px; color: var(--amber);
+    }
+
+    /* STATS GRID */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: 8px; margin: 16px 0;
+    }
+    @media (min-width: 480px) { .stats-grid { grid-template-columns: repeat(4, 1fr); } }
+
+    .stat-card {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 4px; padding: 14px 12px; text-align: center;
+    }
+    .stat-card .stat-label {
+      font-size: 11px; letter-spacing: 0.06em; color: var(--text-muted);
+      text-transform: uppercase; margin-bottom: 6px;
+    }
+    .stat-card .stat-val {
+      font-size: 18px; font-weight: 500;
+      color: var(--text); font-family: var(--mono);
+    }
+    .stat-card .stat-note { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+
+    /* WARNING BAR */
+    .warning-bar {
+      background: rgba(226, 75, 74, 0.08); border: 1px solid rgba(226,75,74,0.2);
+      border-left: 3px solid #e24b4a;
+      border-radius: 0 4px 4px 0; padding: 12px 16px; margin: 16px 0;
+      font-size: 12.5px; color: #e08585;
+    }
+
+    /* TIP BOX */
+    .tip-box {
+      background: rgba(52, 169, 124, 0.07); border: 1px solid rgba(52,169,124,0.2);
+      border-left: 3px solid var(--green);
+      border-radius: 0 4px 4px 0; padding: 12px 16px; margin: 16px 0;
+      font-size: 12.5px; color: #7fcca3;
+    }
+
+    /* COPY BUTTON */
+    .copy-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: transparent; border: 1px solid var(--border);
+      color: var(--text-muted); font-family: var(--mono);
+      font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 7px 14px; border-radius: 2px; cursor: pointer;
+      transition: all 0.15s; margin-top: 16px;
+    }
+    .copy-btn:hover { border-color: var(--amber); color: var(--amber); background: var(--amber-glow); }
+    .copy-btn.copied { border-color: var(--green); color: var(--green); background: rgba(52,169,124,0.08); }
+
+    /* EMPTY TIP PLACEHOLDER */
+    .empty-placeholder {
+      padding: 20px 0;
+      font-size: 13px; color: var(--text-dim);
+      font-style: italic; text-align: center;
+    }
+
+    /* CONCLUSION */
+    .conclusion {
+      padding: 56px 0 48px;
+      border-top: 1px solid var(--border);
+    }
+
+    .conclusion-heading {
+      font-family: var(--serif); font-size: 28px; font-weight: 700;
+      color: var(--text); margin-bottom: 20px;
+    }
+
+    .conclusion-text {
+      font-size: 14px; color: var(--text-muted); line-height: 1.9;
+      max-width: 560px; margin-bottom: 16px;
+    }
+
+    .conclusion-text strong { color: var(--text); font-weight: 500; }
+
+    .conclusion-callout {
+      display: inline-block;
+      font-family: var(--serif); font-style: italic;
+      font-size: clamp(18px, 3vw, 24px); font-weight: 300;
+      color: var(--amber); margin: 24px 0; line-height: 1.4;
+      padding-left: 20px;
+      border-left: 2px solid var(--amber-dim);
+    }
+
+    /* FOOTER */
+    footer {
+      padding: 32px 0 48px;
+      border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px;
+    }
+
+    .footer-back { color: var(--text-muted); text-decoration: none; font-size: 12px;
+      letter-spacing: 0.08em; text-transform: uppercase; display: inline-flex;
+      align-items: center; gap: 6px; transition: color 0.2s; }
+    .footer-back::before { content: '←'; }
+    .footer-back:hover { color: var(--amber); }
+
+    .footer-brand { font-size: 11px; color: var(--text-dim); letter-spacing: 0.06em; }
+    .footer-brand span { color: var(--amber); }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 2px; }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .hero { animation: fadeUp 0.5s ease both; }
+    .tip { animation: fadeUp 0.4s ease both; }
+    .tip:nth-child(1) { animation-delay: 0.05s; }
+    .tip:nth-child(2) { animation-delay: 0.1s; }
+    .tip:nth-child(3) { animation-delay: 0.15s; }
+    .tip:nth-child(4) { animation-delay: 0.2s; }
+    .tip:nth-child(5) { animation-delay: 0.25s; }
+    .tip:nth-child(6) { animation-delay: 0.3s; }
+    .tip:nth-child(7) { animation-delay: 0.35s; }
+    .tip:nth-child(8) { animation-delay: 0.4s; }
+    .tip:nth-child(9) { animation-delay: 0.45s; }
+    .tip:nth-child(10) { animation-delay: 0.5s; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <a href="#" class="back-link">Back to Resources</a>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">10 Tips</div>
+    <h1 class="hero-title">Stop Hitting<br><em>Limits</em></h1>
+    <p class="hero-subtitle">10 things to stop rate limits</p>
+    <p class="hero-intro">
+      I stopped hitting Claude's usage limits. Here are 10 things I changed.<br>
+      <strong>Claude doesn't count messages — it counts tokens.</strong><br><br>
+      Most people blame Claude for strict limits. The real issue? Token management.
+      All you need to do is use tokens wisely.
+    </p>
+  </section>
+
+  <!-- TIPS -->
+  <section class="tips-list">
+
+    <!-- TIP 1 -->
+    <div class="tip active" id="tip-1">
+      <div class="tip-header" onclick="toggleTip('tip-1')">
+        <span class="tip-num">Tip 01</span>
+        <span class="tip-title-text">Edit your prompt. Don't send a follow-up</span>
+        <span class="tip-chevron">▾</span>
+      </div>
+      <div class="tip-body">
+        <div class="tip-content">
+          <p>When Claude doesn't get your thoughts right, you might feel tempted to send:</p>
+
+          <div class="warning-bar">
+            "No, I meant [your message]"<br>
+            "Ugh, that's not what I wanted [your message]"
+          </div>
+
+          <p><strong>Don't do that.</strong></p>
+
+          <p>Every subsequent message is added to the conversation history. Claude re-reads <strong>ALL of it</strong> every turn — burning tokens on context that didn't even help.</p>
+
+          <div class="formula-box">
+            Token cost per message = all previous messages + your new one<br>
+            <br>
+            Total = S × N(N+1) / 2 &nbsp;&nbsp;<span style="color: var(--text-muted); font-size: 11px;">(S = avg tokens per exchange, N = message count)</span>
+          </div>
+
+          <p>At ~500 tokens per exchange:</p>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">5 msgs</div>
+              <div class="stat-val">7.5K</div>
+              <div class="stat-note">tokens</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">10 msgs</div>
+              <div class="stat-val">27.5K</div>
+              <div class="stat-note">tokens</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">20 msgs</div>
+              <div class="stat-val">105K</div>
+              <div class="stat-note">tokens</div>
+            </div>
+            <div class="stat-card" style="border-color: rgba(245,166,35,0.25); background: var(--amber-glow);">
+              <div class="stat-label" style="color: var(--amber);">30 msgs</div>
+              <div class="stat-val" style="color: var(--amber);">232K</div>
+              <div class="stat-note" style="color: var(--amber-dim);">tokens</div>
+            </div>
+          </div>
+
+          <p style="font-size: 12.5px; color: var(--amber); letter-spacing: 0.02em;">Message 30 costs 31× more than message 1</p>
+
+          <div class="tip-box">
+            <strong style="color: #a8dfc2;">Instead:</strong> click <strong style="color: #a8dfc2;">Edit</strong> on your original message → fix it → regenerate. The old exchange gets replaced, not stacked.
+          </div>
+
+          <div class="code-block">
+            <pre><span class="code-comment">// The fix is simple</span>
+<span class="code-label">Original message</span>  →  <span class="code-highlight">Edit</span>  →  <span class="code-value">Regenerate</span>
+
+<span class="code-comment">// NOT this</span>
+<span class="code-label">Original message</span>  →  New message  →  New message  →  New message
+<span class="code-comment">//                    ↑ each one stacks ALL previous tokens</span></pre>
+          </div>
+
+          <p style="font-style: italic; color: var(--amber); font-size: 13px;">Fix the prompt, don't feed the history.</p>
+
+          <button class="copy-btn" onclick="copyTip(this, 1)">
+            <span>⊞</span> Copy Tip
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIP 2 -->
+    <div class="tip" id="tip-2">
+      <div class="tip-header" onclick="toggleTip('tip-2')">
+        <span class="tip-num">Tip 02</span>
+        <span class="tip-title-text">Start a fresh chat every 15–20 messages</span>
+        <span class="tip-chevron">▾</span>
+      </div>
+      <div class="tip-body">
+        <div class="tip-content">
+          <p class="empty-placeholder">Content coming soon</p>
+          <button class="copy-btn" onclick="copyTip(this, 2)"><span>⊞</span> Copy Tip</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIP 3 -->
+    <div class="tip" id="tip-3">
+      <div class="tip-header" onclick="toggleTip('tip-3')">
+        <span class="tip-num">Tip 03</span>
+        <span class="tip-title-text">Batch your questions into one message</span>
+        <span class="tip-chevron">▾</span>
+      </div>
+      <div class="tip-body">
+        <div class="tip-content">
+          <p class="empty-placeholder">Content coming soon</p>
+          <button class="copy-btn" onclick="copyTip(this, 3)"><span>⊞</span> Copy Tip</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIP 4 -->
+    <div class="tip" id="tip-4">
+      <div class="tip-header" onclick="toggleTip('tip-4')">
+        <span class="tip-num">Tip 04</span>
+        <span class="tip-title-text">Upload recurring files to Projects</span>
+        <span class="tip-chevron">▾</span>
+      </div>
+      <div class="tip-body">
+        <div class="tip-content">
+          <p class="empty-placeholder">Content coming soon</p>
+          <button class="copy-btn" onclick="copyTip(this, 4)"><span>⊞</span> Copy Tip</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIP 5 -->
+    <div class="tip" id="tip-5">
+      <div class="tip-header" onclick="toggleTip('tip-5')">
+        <span class="tip-num">Tip 05</span>
+        <span class="tip-title-text">Set up Memory & User Preferences</span>
+        <span class="tip-chevron">▾</span>
+      </div>
+      <div class="tip-body">
+        <div class="tip-content">
+          <p class="empty-placeholder">Content coming soon</p>
+          <button class="copy-btn" onclick="copyTip(this, 5)"><span>⊞</span> Copy Tip</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIP 6 -->
+    <div class="tip" id="tip-6">
+      <div class="tip-header" onclick="toggleTip('tip-6')">
+        <span class="tip-num">Tip 06</span>
+        <span class="tip-title-text">Turn off features you're not actively using</span>
+        <span class="tip-chevron">▾</span>
+      </div>
+      <div class="tip-body">
+        <div class="tip-content">
+          <p class="empty-placeholder">Content coming soon</p>
+          <button class="copy-btn" onclick="copyTip(this, 6)"><span>⊞</span> Copy Tip</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIP 7 -->
+    <div class="tip" id="tip-7">
+      <div class="tip-header" onclick="toggleTip('tip-7')">
+        <span class="tip-num">Tip 07</span>
+        <span class="tip-title-text">Use Haiku for simple tasks</span>
+        <span class="tip-chevron">▾</span>
+      </div>
+      <div class="tip-body">
+        <div class="tip-content">
+          <p class="empty-placeholder">Content coming soon</p>
+          <button class="copy-btn" onclick="copyTip(this, 7)"><span>⊞</span> Copy Tip</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIP 8 -->
+    <div class="tip" id="tip-8">
+      <div class="tip-header" onclick="toggleTip('tip-8')">
+        <span class="tip-num">Tip 08</span>
+        <span class="tip-title-text">Spread your work across the day</span>
+        <span class="tip-chevron">▾</span>
+      </div>
+      <div class="tip-body">
+        <div class="tip-content">
+          <p class="empty-placeholder">Content coming soon</p>
+          <button class="copy-btn" onclick="copyTip(this, 8)"><span>⊞</span> Copy Tip</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIP 9 -->
+    <div class="tip" id="tip-9">
+      <div class="tip-header" onclick="toggleTip('tip-9')">
+        <span class="tip-num">Tip 09</span>
+        <span class="tip-title-text">Work during off-peak hours</span>
+        <span class="tip-chevron">▾</span>
+      </div>
+      <div class="tip-body">
+        <div class="tip-content">
+          <p class="empty-placeholder">Content coming soon</p>
+          <button class="copy-btn" onclick="copyTip(this, 9)"><span>⊞</span> Copy Tip</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIP 10 -->
+    <div class="tip" id="tip-10">
+      <div class="tip-header" onclick="toggleTip('tip-10')">
+        <span class="tip-num">Tip 10</span>
+        <span class="tip-title-text">Enable Extra Usage as a safety net</span>
+        <span class="tip-chevron">▾</span>
+      </div>
+      <div class="tip-body">
+        <div class="tip-content">
+          <p class="empty-placeholder">Content coming soon</p>
+          <button class="copy-btn" onclick="copyTip(this, 10)"><span>⊞</span> Copy Tip</button>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- CONCLUSION -->
+  <section class="conclusion">
+    <h2 class="conclusion-heading">Conclusion</h2>
+    <p class="conclusion-text">
+      At first, it will be very difficult to follow all the rules, but once you can apply them automatically,
+      you'll almost never hit your limits.
+    </p>
+    <p class="conclusion-text">
+      You might even switch from the max plan to a regular one — you'll have plenty of tokens!
+    </p>
+    <div class="conclusion-callout">
+      Claude doesn't count messages.<br>It counts tokens.
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <a href="#" class="footer-back">Back to Resources</a>
+    <span class="footer-brand">Powered by <span>ElevenAgents</span></span>
+  </footer>
+
+</div>
+
+<script>
+  function toggleTip(id) {
+    const el = document.getElementById(id);
+    const isActive = el.classList.contains('active');
+    el.classList.toggle('active', !isActive);
+  }
+
+  const tipTexts = {
+    1: `Tip 1: Edit your prompt. Don't send a follow-up.\n\nWhen Claude doesn't get your thoughts right, click Edit on your original message → fix it → regenerate. The old exchange gets replaced, not stacked.\n\nToken cost formula: Total = S × N(N+1) / 2\nAt ~500 tokens per exchange:\n• 5 messages: 7.5K tokens\n• 10 messages: 27.5K tokens\n• 20 messages: 105K tokens\n• 30 messages: 232K tokens\n\nMessage 30 costs 31x more than message 1.\n\nFix the prompt, don't feed the history.`,
+    2: `Tip 2: Start a fresh chat every 15–20 messages.`,
+    3: `Tip 3: Batch your questions into one message.`,
+    4: `Tip 4: Upload recurring files to Projects.`,
+    5: `Tip 5: Set up Memory & User Preferences.`,
+    6: `Tip 6: Turn off features you're not actively using.`,
+    7: `Tip 7: Use Haiku for simple tasks.`,
+    8: `Tip 8: Spread your work across the day.`,
+    9: `Tip 9: Work during off-peak hours.`,
+    10: `Tip 10: Enable Extra Usage as a safety net.`,
+  };
+
+  function copyTip(btn, num) {
+    navigator.clipboard.writeText(tipTexts[num] || '').then(() => {
+      btn.classList.add('copied');
+      btn.querySelector('span').textContent = '✓';
+      btn.childNodes[1].textContent = ' Copied!';
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.querySelector('span').textContent = '⊞';
+        btn.childNodes[1].textContent = ' Copy Tip';
+      }, 2000);
+    });
+  }
+</script>
+</body>
+</html>
