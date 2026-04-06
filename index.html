@@ -103,6 +103,13 @@
     .model-card.high .m-cost { color: var(--red); }
     .emphasis-line { font-family: 'Playfair Display', serif; font-style: italic; font-size: 17px; color: var(--accent); margin: 20px 0 8px; padding-left: 16px; border-left: 2px solid var(--accent-border); line-height: 1.4; }
     .accent-note { font-size: 13px; color: var(--accent); font-weight: 600; margin-top: 8px; }
+    .time-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 16px 0; }
+    @media(max-width:420px) { .time-grid { grid-template-columns: 1fr; } }
+    .time-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; }
+    .time-card.peak { background: var(--red-bg); border-color: var(--red-border); }
+    .time-zone { font-size: 11px; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; }
+    .time-range { font-size: 15px; font-weight: 600; color: var(--text); }
+    .time-card.peak .time-range { color: var(--red); }
 
     /* COPY BUTTON */
     .copy-btn { display: inline-flex; align-items: center; gap: 7px; margin-top: 20px; background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; letter-spacing: 0.04em; padding: 8px 16px; border-radius: 100px; cursor: pointer; transition: all 0.15s; }
@@ -113,6 +120,9 @@
     .conclusion { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 48px 40px; margin-top: 16px; }
     .conclusion h2 { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; color: var(--text); margin-bottom: 20px; }
     .conclusion p { font-size: 15px; color: var(--text-secondary); line-height: 1.85; margin-bottom: 14px; max-width: 560px; }
+    .conclusion-list { list-style: none; margin: 16px 0 20px; display: flex; flex-direction: column; gap: 8px; }
+    .conclusion-list li { font-size: 14px; color: var(--text-secondary); padding-left: 18px; position: relative; }
+    .conclusion-list li::before { content: '◆'; position: absolute; left: 0; color: var(--accent); font-size: 7px; top: 6px; }
     .conclusion-callout { font-family: 'Playfair Display', serif; font-style: italic; font-size: 22px; color: var(--accent); border-top: 1px solid var(--border); margin-top: 32px; padding-top: 28px; line-height: 1.4; }
 
     /* ANIMATIONS */
@@ -130,11 +140,10 @@
   <section class="hero">
     <div class="badge">10 Tips</div>
     <h1 class="hero-title">Stop Hitting<br><span class="acc">Limits</span></h1>
-    <p class="hero-sub">10 things to stop rate limits</p>
+    <p class="hero-sub">Simple habits that keep you inside Claude's usage limits</p>
     <div class="hero-body">
-      I stopped hitting Claude's usage limits. Here are 10 things I changed.<br>
-      <strong>Claude doesn't count messages — it counts tokens.</strong><br><br>
-      Most people blame Claude for strict limits. The real issue? Token management. All you need to do is use tokens wisely.
+      Most people think Claude cuts them off because of too many <em>messages</em>. That's not how it works.<br><br>
+      <strong>Claude doesn't count messages — it counts tokens.</strong> A token is roughly one word or part of a word. Every message you send, every file you upload, and every correction you add all use tokens. Once you understand that, it's easy to use far fewer of them.
     </div>
     <div class="hero-rule">Claude doesn't count messages. It counts tokens.</div>
   </section>
@@ -144,15 +153,15 @@
     <div class="tip" id="t1">
       <div class="tip-header" onclick="toggle('t1')">
         <div class="tip-num">01</div>
-        <div class="tip-label">Edit your prompt. Don't send a follow-up</div>
+        <div class="tip-label">Edit your message instead of sending a correction</div>
         <span class="tip-tag">Most impactful</span>
         <div class="tip-arrow">▾</div>
       </div>
       <div class="tip-body"><div class="tip-inner"><div class="tip-content">
-        <p>When Claude doesn't get your thoughts right, you might feel tempted to send:</p>
-        <div class="quote-block">"No, I meant [your message]"<br>"Ugh, that's not what I wanted [your message]"</div>
-        <p><strong>Don't do that!</strong> Every subsequent message is added to the conversation history. Claude re-reads ALL of it every turn — burning tokens on context that didn't even help.</p>
-        <div class="formula-block">Token cost per message = all previous messages + your new one<br>Total = S × N(N+1) / 2 &nbsp;&nbsp;(S = avg tokens per exchange, N = message count)</div>
+        <p>When Claude gives you a wrong answer, it's tempting to reply with:</p>
+        <div class="quote-block">"No, that's not what I meant…"<br>"Try again, but do it differently…"</div>
+        <p><strong>Don't do that.</strong> Claude re-reads every single message in your chat before answering. Every correction you add makes the next reply more expensive. The longer the chat, the worse it gets.</p>
+        <div class="formula-block">Token cost per message = all previous messages + your new one<br>Total ≈ S × N(N+1) / 2 &nbsp;&nbsp;(S = avg tokens per exchange, N = message count)</div>
         <p>At ~500 tokens per exchange:</p>
         <div class="stats-grid">
           <div class="stat"><div class="s-label">5 msgs</div><div class="s-val">7.5K</div></div>
@@ -160,9 +169,9 @@
           <div class="stat"><div class="s-label">20 msgs</div><div class="s-val">105K</div></div>
           <div class="stat hl"><div class="s-label">30 msgs</div><div class="s-val">232K</div></div>
         </div>
-        <p class="accent-note">Message 30 costs 31× more than message 1</p>
-        <div class="callout-green"><strong>Instead:</strong> click Edit on your original message → fix it → regenerate. The old exchange gets replaced, not stacked.</div>
-        <div class="emphasis-line">Fix the prompt, don't feed the history.</div>
+        <p class="accent-note">Your 30th message costs 31× more tokens than your 1st</p>
+        <div class="callout-green"><strong>The fix:</strong> Click the pencil (Edit) icon on your original message → rewrite it → resend. Claude replaces the old exchange instead of stacking on top of it. Fewer tokens, better result.</div>
+        <div class="emphasis-line">Rewrite the question. Don't keep adding to it.</div>
         <button class="copy-btn" onclick="copyTip(this,1)">⊞ Copy Tip</button>
       </div></div></div>
     </div>
@@ -174,10 +183,10 @@
         <div class="tip-arrow">▾</div>
       </div>
       <div class="tip-body"><div class="tip-inner"><div class="tip-content">
-        <p>Token costs grow with every message. Ideally, you should start a new chat every 15–20 messages.</p>
-        <p>Now imagine a chat with 100+ messages. At ~500 tokens per exchange, that's over <strong>2.5 million tokens burned</strong> — most of it just re-reading old history.</p>
-        <div class="callout-blue">One developer tracked his usage and found that <strong>98.5% of tokens were spent re-reading the history.</strong> Only 1.5% went toward actually outputting the result.</div>
-        <div class="callout-green">When a chat gets long → ask Claude to summarize everything → copy it → new chat → paste as first message.</div>
+        <p>As a chat gets longer, Claude has to process more and more history just to answer your latest message. In a 100-message chat at ~500 tokens each, that's over <strong>2.5 million tokens</strong> — most of it just re-reading old context.</p>
+        <div class="callout-blue">One developer measured his own usage and found <strong>98.5% of tokens were spent re-reading history.</strong> Only 1.5% actually went into the answer.</div>
+        <div class="callout-green"><strong>Simple habit:</strong> When your chat gets long, ask Claude to write a short summary of what you've covered. Copy it. Open a new chat. Paste it as your first message. You carry the knowledge forward without all the baggage.</div>
+        <div class="emphasis-line">Long chat = expensive chat. Restart often.</div>
         <button class="copy-btn" onclick="copyTip(this,2)">⊞ Copy Tip</button>
       </div></div></div>
     </div>
@@ -185,21 +194,20 @@
     <div class="tip" id="t3">
       <div class="tip-header" onclick="toggle('t3')">
         <div class="tip-num">03</div>
-        <div class="tip-label">Batch your questions into one message</div>
+        <div class="tip-label">Ask multiple things in one message</div>
         <div class="tip-arrow">▾</div>
       </div>
       <div class="tip-body"><div class="tip-inner"><div class="tip-content">
-        <p>Many people believe that splitting questions into separate messages leads to better results. Almost always, the opposite is true.</p>
-        <p><strong>Three separate prompts = three context loads.<br>One prompt with three tasks = one context load.</strong></p>
-        <p>You save tokens twice: fewer context reloads, and you stay further from hitting your limit.</p>
+        <p>A lot of people send one question at a time. But every single message makes Claude re-read your entire chat history from the start.</p>
+        <p><strong>3 separate messages = 3 full context reloads.<br>1 message with 3 tasks = 1 context reload.</strong></p>
         <div class="code-example">
           <div class="cross">"Summarize this article"</div>
-          <div class="cross">"Now list the main points"</div>
-          <div class="cross">"Now suggest a headline"</div>
-          <span class="good">✓ "Summarize this article, list the main points, and suggest a headline."</span>
+          <div class="cross">"Now list the key points"</div>
+          <div class="cross">"Now write a headline"</div>
+          <span class="good">✓ "Summarize this article, list the key points, and write a headline — all in one response."</span>
         </div>
-        <p>Bonus: the answers often turn out better because Claude immediately sees the full picture.</p>
-        <div class="emphasis-line">Three questions. One prompt. Always!</div>
+        <p>Bonus: combining tasks usually gives a better answer, because Claude sees the full picture at once.</p>
+        <div class="emphasis-line">Three questions. One prompt. Always.</div>
         <button class="copy-btn" onclick="copyTip(this,3)">⊞ Copy Tip</button>
       </div></div></div>
     </div>
@@ -207,15 +215,14 @@
     <div class="tip" id="t4">
       <div class="tip-header" onclick="toggle('t4')">
         <div class="tip-num">04</div>
-        <div class="tip-label">Upload recurring files to Projects</div>
+        <div class="tip-label">Use Projects for files you upload repeatedly</div>
         <div class="tip-arrow">▾</div>
       </div>
       <div class="tip-body"><div class="tip-inner"><div class="tip-content">
-        <p>If you upload the same PDF to multiple chats, Claude re-tokenizes that document every single time.</p>
+        <p>If you upload the same PDF across multiple separate chats — a contract, a brief, a style guide — Claude re-reads and re-processes it from scratch every single time.</p>
         <p><strong>Use the Projects feature instead.</strong></p>
-        <p>Upload your file once → it gets cached. Every new conversation inside that project references it without burning tokens again.</p>
-        <div class="callout-blue">Cached project content doesn't eat into your usage when you access it repeatedly.</div>
-        <p>If you work with contracts, briefs, style guides, or any long docs — this alone could cut your token spend dramatically.</p>
+        <p>Upload your file once inside a Project. It gets stored and cached. Every conversation you start inside that Project can access it without burning tokens again.</p>
+        <div class="callout-blue">If you work with the same documents regularly, this one change alone can cut your token usage significantly — no habit change required, just a different place to start your chats.</div>
         <button class="copy-btn" onclick="copyTip(this,4)">⊞ Copy Tip</button>
       </div></div></div>
     </div>
@@ -223,13 +230,13 @@
     <div class="tip" id="t5">
       <div class="tip-header" onclick="toggle('t5')">
         <div class="tip-num">05</div>
-        <div class="tip-label">Set up Memory &amp; User Preferences</div>
+        <div class="tip-label">Save your preferences — stop repeating yourself</div>
         <div class="tip-arrow">▾</div>
       </div>
       <div class="tip-body"><div class="tip-inner"><div class="tip-content">
-        <p>Every new chat without saved context wastes 3–5 messages on setup: <em>"I'm a marketer, I write in a casual style, I prefer short paragraphs…"</em></p>
-        <p>You've probably seen people start every prompt with "Act as a..." — that's tokens burned on repeat. <strong>Claude can remember this permanently.</strong></p>
-        <div class="callout-green">Go to <strong>Settings → Memory and User Settings.</strong> Save your role, communication style, and preferences once. Claude will automatically apply them to every new chat.</div>
+        <p>Do you start every new chat with <em>"Act as a senior copywriter. I prefer short sentences. Casual tone…"</em>? That's 3–5 messages of setup tokens wasted every single time.</p>
+        <p>Claude can remember this permanently. You only have to say it once.</p>
+        <div class="callout-green">Go to <strong>Settings → Memory &amp; User Preferences.</strong> Describe your role, writing style, and what you expect from Claude. It applies automatically to every chat from then on. No more setup — just jump straight into the work.</div>
         <button class="copy-btn" onclick="copyTip(this,5)">⊞ Copy Tip</button>
       </div></div></div>
     </div>
@@ -241,10 +248,10 @@
         <div class="tip-arrow">▾</div>
       </div>
       <div class="tip-body"><div class="tip-inner"><div class="tip-content">
-        <p>Web search, connectors, and "Explore" mode — all of these add tokens to every response, even if you don't need them.</p>
-        <p>Writing your own content? <strong>Turn off the "Search and Tools" feature.</strong></p>
-        <p>The "Advanced Thinking" feature also consumes tokens. Keep it turned off by default. Only turn it on if your first attempt was unsatisfactory.</p>
-        <div class="emphasis-line">If you didn't turn this feature on intentionally, turn it off.</div>
+        <p>Web search, connectors, and Extended Thinking all add tokens to every response — even when they're not helping with your task at all.</p>
+        <p>Writing content? <strong>Turn off web search.</strong><br>Simple Q&amp;A? <strong>Turn off Extended Thinking.</strong><br>Not using integrations? <strong>Disable connectors.</strong></p>
+        <div class="callout-green">Good rule of thumb: if you didn't turn a feature on with a specific reason in mind, turn it off. Only enable Extended Thinking if your first attempt without it wasn't good enough.</div>
+        <div class="emphasis-line">Active features cost tokens even when they're not helping.</div>
         <button class="copy-btn" onclick="copyTip(this,6)">⊞ Copy Tip</button>
       </div></div></div>
     </div>
@@ -256,15 +263,14 @@
         <div class="tip-arrow">▾</div>
       </div>
       <div class="tip-body"><div class="tip-inner"><div class="tip-content">
-        <p>Grammar checking, brainstorming, formatting, quick translations, short answers — Haiku handles all of this at a much lower cost than Sonnet or Opus.</p>
-        <p><strong>Choosing the right model is the most important decision you make every day.</strong></p>
-        <p>Haiku for drafts and simple tasks → frees up 50–70% of your budget for tasks that truly require powerful models.</p>
+        <p>Not every task needs the most powerful model. Claude Haiku costs far fewer tokens than Sonnet or Opus — and for many everyday tasks, you won't notice any difference in quality.</p>
         <div class="model-grid">
-          <div class="model-card low"><div class="m-name">Haiku</div><div class="m-desc">Quick tasks, drafts, formatting, simple Q&amp;A</div><div class="m-cost">Low cost</div></div>
-          <div class="model-card mid"><div class="m-name">Sonnet</div><div class="m-desc">Real work, analysis, writing, coding</div><div class="m-cost">Medium cost</div></div>
-          <div class="model-card high"><div class="m-name">Opus</div><div class="m-desc">Deep thinking, complex reasoning</div><div class="m-cost">High cost</div></div>
+          <div class="model-card low"><div class="m-name">Haiku</div><div class="m-desc">Drafts, grammar, formatting, quick Q&amp;A, translations</div><div class="m-cost">Low cost</div></div>
+          <div class="model-card mid"><div class="m-name">Sonnet</div><div class="m-desc">Writing, analysis, coding, detailed tasks</div><div class="m-cost">Medium cost</div></div>
+          <div class="model-card high"><div class="m-name">Opus</div><div class="m-desc">Deep research, complex reasoning, hard problems</div><div class="m-cost">High cost</div></div>
         </div>
-        <div class="emphasis-line">You don't need powerful models for simple tasks!</div>
+        <p>Use Haiku for rough work and first drafts. Bring in Sonnet or Opus only when you really need it. This one habit can stretch your budget by 50–70%.</p>
+        <div class="emphasis-line">Right model for the right job. Not always the best one.</div>
         <button class="copy-btn" onclick="copyTip(this,7)">⊞ Copy Tip</button>
       </div></div></div>
     </div>
@@ -276,9 +282,10 @@
         <div class="tip-arrow">▾</div>
       </div>
       <div class="tip-body"><div class="tip-inner"><div class="tip-content">
-        <p>The Claude system uses a <strong>rolling 5-hour window.</strong> It does not reset at midnight — your limit gradually replenishes. Messages sent at 9 AM will no longer count by 2 PM.</p>
-        <p>If you use up your entire limit during a single morning session, most of your daily capacity remains unused.</p>
-        <div class="callout-green">Divide your day into 2–3 sessions: morning, afternoon, and evening. By the time you return, your previous usage is no longer counted — and you have a fresh limit.</div>
+        <p>Claude's limits don't reset at midnight. They use a <strong>rolling 5-hour window.</strong> Tokens you used 5 hours ago are no longer counted against you.</p>
+        <p>If you spend your whole budget in a two-hour morning sprint, you've wasted most of your daily capacity. Splitting work into 2–3 sessions means each session starts with a refreshed limit.</p>
+        <div class="callout-green"><strong>Try this:</strong> Morning session → step away → afternoon session → evening session. By the time you come back, your earlier usage has mostly expired and you have plenty of room again.</div>
+        <div class="emphasis-line">Pace yourself. The limit refills if you give it time.</div>
         <button class="copy-btn" onclick="copyTip(this,8)">⊞ Copy Tip</button>
       </div></div></div>
     </div>
@@ -286,15 +293,24 @@
     <div class="tip" id="t9">
       <div class="tip-header" onclick="toggle('t9')">
         <div class="tip-num">09</div>
-        <div class="tip-label">Work during off-peak hours</div>
+        <div class="tip-label">Do heavy work outside peak hours</div>
         <div class="tip-arrow">▾</div>
       </div>
       <div class="tip-body"><div class="tip-inner"><div class="tip-content">
-        <p>Starting March 26, 2026: Anthropic will now use up your 5-hour session limit more quickly during peak hours:</p>
-        <div class="callout-blue"><strong>5:00 AM – 11:00 AM Pacific &nbsp;/&nbsp; 8:00 AM – 2:00 PM Eastern</strong> on weekdays</div>
-        <p>Same query, same chat — but during peak hours, it impacts your limit more.</p>
-        <p>Your weekly limit remains the same. But how it's distributed has changed. <strong>Running resource-intensive tasks in the evening or on weekends will significantly stretch your plan.</strong></p>
-        <div class="callout-green">If you're outside the U.S. (Europe, Latin America, Asia), peak hours may fall during your afternoon — check the calculation based on your time zone.</div>
+        <p>Since March 26, 2026, Anthropic counts the same token usage more heavily during peak hours. The exact same message chips away at your limit faster if you send it during busy times.</p>
+        <p>Peak hours (weekdays):</p>
+        <div class="time-grid">
+          <div class="time-card peak">
+            <div class="time-zone">Pacific Time</div>
+            <div class="time-range">5:00 AM – 11:00 AM</div>
+          </div>
+          <div class="time-card peak">
+            <div class="time-zone">Eastern Time</div>
+            <div class="time-range">8:00 AM – 2:00 PM</div>
+          </div>
+        </div>
+        <p>Your weekly total stays the same. But during peak hours, each task eats your budget faster. Scheduling heavy tasks for evenings or weekends can meaningfully stretch your plan.</p>
+        <div class="callout-blue">Outside the US? Peak hours are set to US Pacific time — so depending on your timezone, they may land in your afternoon or evening. Adjust your schedule accordingly.</div>
         <button class="copy-btn" onclick="copyTip(this,9)">⊞ Copy Tip</button>
       </div></div></div>
     </div>
@@ -306,10 +322,10 @@
         <div class="tip-arrow">▾</div>
       </div>
       <div class="tip-body"><div class="tip-inner"><div class="tip-content">
-        <p>Subscribers to the <strong>Pro, Max 5x, and Max 20x</strong> plans can enable the "Overage" feature in <strong>Settings → Usage.</strong></p>
-        <p>When your session limit is reached, Claude won't block your access. It will switch to pay-as-you-go billing at API rates.</p>
-        <div class="callout-blue">You set a monthly spending limit to avoid unexpected bills.</div>
-        <p>This isn't about saving tokens — it's about <strong>not losing your work at the worst possible moment.</strong></p>
+        <p>Even with all the above habits, you'll occasionally hit your limit right in the middle of something important. That's what the <strong>Extra Usage (Overage)</strong> feature is for.</p>
+        <p>Available on <strong>Pro, Max 5x, and Max 20x</strong> plans. Find it under <strong>Settings → Usage → Enable Overage.</strong></p>
+        <p>When your session limit runs out, Claude switches to pay-as-you-go billing at API rates instead of blocking you. You set a monthly spending cap so there are no surprise charges.</p>
+        <div class="callout-blue">This isn't about using more tokens — it's about <strong>never losing your work at a critical moment.</strong> Think of it as a safety net, not a default mode.</div>
         <button class="copy-btn" onclick="copyTip(this,10)">⊞ Copy Tip</button>
       </div></div></div>
     </div>
@@ -317,10 +333,18 @@
   </section>
 
   <section class="conclusion">
-    <h2>Conclusion</h2>
-    <p>At first, it will be very difficult to follow all the rules, but once you can apply them automatically, you'll almost never hit your limits.</p>
-    <p>You might even switch from the max plan to a regular one — you'll have plenty of tokens!</p>
-    <div class="conclusion-callout">Claude doesn't count messages.<br>It counts tokens.</div>
+    <h2>Putting it all together</h2>
+    <p>None of these tips require you to change what you use Claude for. They're just small habit shifts that add up to a very different experience.</p>
+    <p>Start with the ones that feel easiest:</p>
+    <ul class="conclusion-list">
+      <li>Edit messages instead of sending corrections</li>
+      <li>Save your preferences once in Settings</li>
+      <li>Use Projects for files you keep re-uploading</li>
+      <li>Batch your questions into single messages</li>
+      <li>Break your work into 2–3 sessions per day</li>
+    </ul>
+    <p>Once these become automatic, you'll almost never hit your limits. You might even find yourself downgrading your plan — because the lower one suddenly has more than enough room.</p>
+    <div class="conclusion-callout">Claude counts tokens, not messages.<br>Now you know how to spend fewer of them.</div>
   </section>
 
 </div>
@@ -329,16 +353,16 @@
     document.getElementById(id).classList.toggle('open');
   }
   const tips = {
-    1:`Tip 1: Edit your prompt. Don't send a follow-up.\n\nToken cost formula: Total = S × N(N+1) / 2\nAt ~500 tokens per exchange:\n• 5 msgs: 7.5K tokens\n• 10 msgs: 27.5K tokens\n• 20 msgs: 105K tokens\n• 30 msgs: 232K tokens\nMessage 30 costs 31x more than message 1.\n\nInstead: click Edit → fix it → regenerate.\nFix the prompt, don't feed the history.`,
-    2:`Tip 2: Start a fresh chat every 15–20 messages.\n\nWhen a chat gets long → ask Claude to summarize everything → copy it → new chat → paste as first message.`,
-    3:`Tip 3: Batch your questions into one message.\n\nThree separate prompts = three context loads. One prompt with three tasks = one context load.\n\nThree questions. One prompt. Always!`,
-    4:`Tip 4: Upload recurring files to Projects.\n\nUpload once → cached. Every new conversation references it without burning tokens again.`,
-    5:`Tip 5: Set up Memory & User Preferences.\n\nSettings → Memory and User Settings. Save your role and style once. Claude applies it automatically.`,
-    6:`Tip 6: Turn off features you're not actively using.\n\nWeb search, connectors, Advanced Thinking — if you didn't turn it on intentionally, turn it off.`,
-    7:`Tip 7: Use Haiku for simple tasks.\n\nHaiku → quick tasks (low) | Sonnet → real work (medium) | Opus → deep thinking (high)\nYou don't need powerful models for simple tasks!`,
-    8:`Tip 8: Spread your work across the day.\n\nRolling 5-hour window. Divide into 2–3 sessions: morning, afternoon, evening.`,
-    9:`Tip 9: Work during off-peak hours.\n\nPeak: 5–11 AM Pacific / 8 AM–2 PM Eastern on weekdays. Same query costs more. Use evenings & weekends for heavy tasks.`,
-    10:`Tip 10: Enable Extra Usage as a safety net.\n\nSettings → Usage → enable Overage. Set a monthly spending cap. Never lose your work at the worst moment.`
+    1:`Tip 1: Edit your message instead of sending a correction.\n\nClaude re-reads every single message before answering. Every correction makes the next reply more expensive.\n\nToken formula: Total ≈ S × N(N+1) / 2\nAt ~500 tokens per exchange:\n• 5 msgs = 7.5K tokens\n• 10 msgs = 27.5K tokens\n• 20 msgs = 105K tokens\n• 30 msgs = 232K tokens (31× more than msg 1!)\n\nFix: Click Edit on your original message → rewrite it → resend.`,
+    2:`Tip 2: Start a fresh chat every 15–20 messages.\n\nIn a 100-message chat, 98.5% of tokens are spent re-reading history. Only 1.5% goes into the answer.\n\nWhen a chat gets long: Ask Claude to summarize → copy → new chat → paste as first message.`,
+    3:`Tip 3: Ask multiple things in one message.\n\n3 separate messages = 3 full context reloads.\n1 message with 3 tasks = 1 context reload.\n\n✗ "Summarize this" → "List the key points" → "Write a headline"\n✓ "Summarize this, list the key points, and write a headline."`,
+    4:`Tip 4: Use Projects for files you upload repeatedly.\n\nUpload once to a Project → cached. Every conversation inside that Project accesses it without burning tokens again.`,
+    5:`Tip 5: Save your preferences — stop repeating yourself.\n\nSettings → Memory & User Preferences → describe your role and style once. Claude applies it automatically to every chat.`,
+    6:`Tip 6: Turn off features you're not actively using.\n\nWeb search, connectors, Extended Thinking — all cost tokens even when not helping.\n\nRule: if you didn't turn it on with a specific reason, turn it off.`,
+    7:`Tip 7: Use Haiku for simple tasks.\n\nHaiku → drafts, grammar, formatting, Q&A (low cost)\nSonnet → writing, analysis, coding (medium cost)\nOpus → deep research, complex reasoning (high cost)\n\nUsing Haiku for routine tasks can stretch your budget by 50–70%.`,
+    8:`Tip 8: Spread your work across the day.\n\nRolling 5-hour window — not a daily reset. Tokens used 5 hours ago no longer count.\n\nSplit into 2–3 sessions: morning → afternoon → evening.`,
+    9:`Tip 9: Do heavy work outside peak hours.\n\nSince March 26, 2026:\n• Pacific: 5:00 AM – 11:00 AM (weekdays)\n• Eastern: 8:00 AM – 2:00 PM (weekdays)\n\nSchedule heavy tasks for evenings or weekends.`,
+    10:`Tip 10: Enable Extra Usage as a safety net.\n\nPro / Max plan: Settings → Usage → Enable Overage.\n\nWhen your limit runs out, Claude switches to pay-as-you-go at API rates. Set a monthly cap. Never lose your work at a critical moment.`
   };
   function copyTip(btn, n) {
     navigator.clipboard.writeText(tips[n] || '').then(() => {
